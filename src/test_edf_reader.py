@@ -10,11 +10,11 @@ def test_data_format_version():
 
 
 def test_local_patient_id():
-    assert h1['local_patient_id'] == b'5_MIN'
+    assert h1['local_patient_id'] == '5_MIN'
 
 
 def test_local_recording_id():
-    assert h1['local_recording_id'] == b'Startdate 27.11.2018 Cortrium C3'
+    assert h1['local_recording_id'] == 'Startdate 27.11.2018 Cortrium C3'
 
 
 def test_start_time():
@@ -23,11 +23,11 @@ def test_start_time():
 
 
 def test_bytes_in_header():
-    assert int(h1['bytes_in_header']) == 2048
+    assert h1['bytes_in_header'] == 2048
 
 
 def test_subtype():
-    assert h1['subtype'] == b''
+    assert h1['subtype'] == ''
 
 
 def test_contiguous():

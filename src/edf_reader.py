@@ -61,26 +61,26 @@ def get_header_data(f):
     # 'edf+c' => uninterrupted(contiguous) recording && 'edf+d' => interrupted recording
     # h['contiguous'] = h['subtype'] != 'EDF+D'
     h['data_format_version'] = f.read(8).decode('ascii').strip()
-    h['local_patient_id'] = f.read(80).strip()
-    h['local_recording_id'] = f.read(80).strip()
+    h['local_patient_id'] = f.read(80).decode('ascii').strip()
+    h['local_recording_id'] = f.read(80).decode('ascii').strip()
     h['start_time'] = get_start_time(f.read(8).decode('ascii'), f.read(8).decode('ascii'))
-    h['bytes_in_header'] = f.read(8).strip()
-    h['subtype'] = f.read(44).strip()
+    h['bytes_in_header'] = int(f.read(8))
+    h['subtype'] = f.read(44).decode('ascii').strip()
     h['contiguous'] = contiguity(h['subtype'])
     h['number_of_records'] = int(f.read(8))
     h['record_duration'] = float(f.read(8))
     ns = h['number_of_signals'] = int(f.read(4))  # ns variable for use when reading the data
 
     channels = range(ns)
-    h['label'] = [f.read(16).strip() for n in channels]
-    h['transducer_type'] = [f.read(80).strip() for n in channels]
-    h['phisical_dimension'] = [f.read(8).strip() for n in channels]
+    h['label'] = [f.read(16).decode('ascii').strip() for n in channels]
+    h['transducer_type'] = [f.read(80).decode('ascii').strip() for n in channels]
+    h['phisical_dimension'] = [f.read(8).decode('ascii').strip() for n in channels]
     h['phisical_minimum'] = [float(f.read(8)) for n in channels]
     h['phisical_maximum'] = [float(f.read(8)) for n in channels]
     h['digital_minimum'] = [float(f.read(8)) for n in channels]
     h['digital_maximum'] = [float(f.read(8)) for n in channels]
-    h['prefiltering'] = [f.read(80).strip() for n in channels]
-    h['number_of_samples_per_record'] = [f.read(8).strip() for n in channels]
+    h['prefiltering'] = [f.read(80).decode('ascii').strip() for n in channels]
+    h['number_of_samples_per_record'] = [int(f.read(8)) for n in channels]
     h['reserved'] = [f.read(32) for n in channels]
 
     #h['transducer_type']
