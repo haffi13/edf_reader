@@ -35,4 +35,7 @@ def test_bytes_in_header():
 def test_subtype():
 def test_contiguous():
 def test_number_of_records():
+def test_record_duration():
 def test_number_of_signals():
+
+
