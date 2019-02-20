@@ -6,7 +6,7 @@ h2 = reader.load_edf_file('test_generator_2.edf')
 
 
 def test_data_format_version():
-    assert h1['data_format_version'] == b'0'
+    assert h1['data_format_version'] == '0'
 
 
 def test_local_patient_id():
@@ -19,6 +19,7 @@ def test_local_recording_id():
 
 def test_start_time():
     assert h1['start_time'] == str(datetime.datetime(2018, 11, 27, 9, 26, 20))
+
 
 
 def test_bytes_in_header():
