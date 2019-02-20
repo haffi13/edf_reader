@@ -17,19 +17,17 @@ import datetime
 h = reader.load_edf_file('5.edf')
 
 def test_data_format_version():
-
+    assert str(h['data_format_version']) == '0'
 
 def test_local_patient_id():
-
-
+    assert str(h['local_patient_id']) == '5_MIN'
 
 def test_local_recording_id():
-
+    assert str(h['local_recording_id']) == 'Startdate 27.11.2018 Cortrium C3'
 
 def test_start_time():
-    h = reader.load_edf_file('5.edf')
-    b = isinstance(h, dict)
-    assert b == True
+    assert h['start_time'] == str(datetime.datetime(2018, 11, 27, 9, 26, 20))
+
 
 def test_bytes_in_header():
 def test_subtype():
