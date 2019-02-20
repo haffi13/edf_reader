@@ -28,6 +28,7 @@ def load_edf_file(edffile):
     h = reader.header
 
     # 'b' prefix in front of string means it's a bytes literal
+    # Maybe it doesn't matter, otherwise just cast to string in get_header_data
     print('DataFormatVersion - ' + str(h['data_format_version']))
     print(h['data_format_version'])
     print('LocalPatientId - ' + str(h['local_patient_id']))

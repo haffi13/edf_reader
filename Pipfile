@@ -8,7 +8,6 @@ pytest = "*"
 
 [packages]
 numpy = "*"
-re = "*"
 
 [requires]
 python_version = "3.7"
