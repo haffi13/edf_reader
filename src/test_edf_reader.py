@@ -27,19 +27,13 @@ def test_local_recording_id():
 
 
 def test_start_time():
-''' Done by Jonas '''
+    h = reader.load_edf_file('5.edf')
+    b = isinstance(h, dict)
+    assert b == True
+
 def test_bytes_in_header():
-    assert h['bytes_in_header'] == '2048'
-
 def test_subtype():
-    assert str(h['subtype']) == ''
-
 def test_contiguous():
-    assert h['subtype'] == True
-
-''' '''
-
-
 def test_number_of_records():
 def test_record_duration():
 def test_number_of_signals():
