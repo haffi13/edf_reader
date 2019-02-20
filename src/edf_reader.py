@@ -19,16 +19,17 @@ class EdfReader:
 
 def load_edf_file(edffile):
     if isinstance(edffile, str):
-        os.chdir(r'C:\ProjectResources')
+        os.chdir(basestring)
         with open(edffile, 'rb') as edf:
             return load_edf_file(edf)
 
     reader = EdfReader(edffile)
     reader.read_header()
-    h = reader.header
-
+    # h = reader.header
+    return reader.header
     # 'b' prefix in front of string means it's a bytes literal
     # Maybe it doesn't matter, otherwise just cast to string in get_header_data
+    '''
     print('DataFormatVersion - ' + str(h['data_format_version']))
     print(h['data_format_version'])
     print('LocalPatientId - ' + str(h['local_patient_id']))
@@ -39,7 +40,7 @@ def load_edf_file(edffile):
     print('num of records - ' + str(h['number_of_records']))
     print('record duration - ' + str(h['record_duration']))
     print('num of signals - ' + str(h['number_of_signals']))
-
+    '''
 
 def get_header_data(f):
     h = {}
