@@ -34,7 +34,10 @@ def test_bytes_in_header():
 def test_subtype():
 def test_contiguous():
 def test_number_of_records():
+    assert h1['number_of_records'] == 12250
 def test_record_duration():
+    assert h1['record_duration'] == 0.024
 def test_number_of_signals():
+    assert h1['number_of_signals'] == 7
 
 
