@@ -42,6 +42,7 @@ def load_edf_file(edffile):
     print('num of signals - ' + str(h['number_of_signals']))
     '''
 
+
 def get_header_data(f):
     h = {}
     # file = load_edf_file()
@@ -61,11 +62,18 @@ def get_header_data(f):
     h['bytes_in_header'] = f.read(8).strip()
     h['subtype'] = f.read(44).strip()
     # 'edf+c' => uninterrupted(contiguous) recording && 'edf+d' => interrupted recording
-    h['contiguous'] = h['subtype'] != 'EDF+D'
+    # h['contiguous'] = h['subtype'] != 'EDF+D'
+    h['contiguous'] = contiguity(h['subtype'])
     h['number_of_records'] = int(f.read(8))
     h['record_duration'] = float(f.read(8))
     ns = h['number_of_signals'] = int(f.read(4))  # ns variable for use when reading the data
     return h
+
+
+def contiguity(subtype):
+    if subtype == 'EDF+D':
+        return False
+    return True
 
 
 '''
