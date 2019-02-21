@@ -30,6 +30,7 @@ def load_edf_file(edffile):
     # 'b' prefix in front of string means it's a bytes literal
     # Maybe it doesn't matter, otherwise just cast to string in get_header_data
 
+    # Printing for
     print('DataFormatVersion - ' + str(h['data_format_version']))
     print(h['data_format_version'])
     print('LocalPatientId - ' + str(h['local_patient_id']))
@@ -44,9 +45,9 @@ def load_edf_file(edffile):
     print('label ' + str(h['label']))
 
     print(h['transducer_type'])
-    print(h['phisical_dimension'])
-    print(h['phisical_minimum'])
-    print(h['phisical_maximum'])
+    print(h['physical_dimension'])
+    print(h['physical_minimum'])
+    print(h['physical_maximum'])
     print(h['digital_minimum'])
     print(h['digital_maximum'])
     print(h['prefiltering'])
@@ -74,17 +75,14 @@ def get_header_data(f):
     channels = range(ns)
     h['label'] = [f.read(16).decode('ascii').strip() for n in channels]
     h['transducer_type'] = [f.read(80).decode('ascii').strip() for n in channels]
-    h['phisical_dimension'] = [f.read(8).decode('ascii').strip() for n in channels]
-    h['phisical_minimum'] = [float(f.read(8)) for n in channels]
-    h['phisical_maximum'] = [float(f.read(8)) for n in channels]
+    h['physical_dimension'] = [f.read(8).decode('ascii').strip() for n in channels]
+    h['physical_minimum'] = [float(f.read(8)) for n in channels]
+    h['physical_maximum'] = [float(f.read(8)) for n in channels]
     h['digital_minimum'] = [float(f.read(8)) for n in channels]
     h['digital_maximum'] = [float(f.read(8)) for n in channels]
     h['prefiltering'] = [f.read(80).decode('ascii').strip() for n in channels]
     h['number_of_samples_per_record'] = [int(f.read(8)) for n in channels]
     h['reserved'] = [f.read(32) for n in channels]
-
-    #h['transducer_type']
-
     return h
 
 
@@ -98,17 +96,3 @@ def get_start_time(date, time):
     (day, month, year) = [int(x) for x in re.findall('([0-9][0-9])', date)]
     (hour, minute, sec) = [int(x) for x in re.findall('([0-9][0-9])', time)]
     return str(datetime.datetime(2000 + year, month, day, hour, minute, sec))
-
-
-# re.findall(r'\d+'
-# [int(s) for s in str.split() if s.isdigit()]
-# [int(s) for s in str.split() if s.isdigit()]
-
-
-'''
-reader = EdfReader(load_edf_file())
-reader.read_header()
-h = reader.header
-
-print('DataFormatVersion' + str(h['data_format_version']))
-'''
