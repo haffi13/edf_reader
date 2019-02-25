@@ -5,9 +5,8 @@ import re
 basestring = r'C:\ProjectResources'
 filename = '5.edf'  # The 5.edf file is lacking some of the properties an edf file can have, should use some other file for testing
 
+ANNOTATIONS = 'EDF Annotations'
 
-# The file and path are hardcoded in this file
-# This should be changed later
 
 class EdfReader:
     def __init__(self, file):
@@ -30,7 +29,6 @@ def load_edf_file(edffile):
     # 'b' prefix in front of string means it's a bytes literal
     # Maybe it doesn't matter, otherwise just cast to string in get_header_data
 
-    # Printing for
     print('DataFormatVersion - ' + str(h['data_format_version']))
     print(h['data_format_version'])
     print('LocalPatientId - ' + str(h['local_patient_id']))
@@ -41,9 +39,7 @@ def load_edf_file(edffile):
     print('num of records - ' + str(h['number_of_records']))
     print('record duration - ' + str(h['record_duration']))
     print('num of signals - ' + str(h['number_of_signals']))
-
     print('label ' + str(h['label']))
-
     print(h['transducer_type'])
     print(h['physical_dimension'])
     print(h['physical_minimum'])
