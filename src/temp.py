@@ -3,10 +3,11 @@
 
 import edf_reader as e
 import numpy as np
+import re
 
-EVENT_CHANNEL = 'EDF Annotations'
+EVENT_CHANNEL = 'EDF Annotations'  # This is sometimes 'EVENT' instead of 'EDF Annotations' ??
 
-h = e.load_edf_file('5.edf')
+header = e.load_edf_file('5.edf')
 
 
 def convert_record(self, raw_record):
@@ -42,7 +43,9 @@ def tal(tal_str):
           '(?:\x14\x00)'
 
     def annotation_to_list(annotation):
-        return unicode(annotation, 'utf-8').split('\x14') if annotation else []
+        return str(annotation, 'utf-8').split('\x14') if annotation else []
+
+    # https://stackoverflow.com/questions/38697037/how-to-convert-python-2-unicode-function-into-correct-python-3-x-syntax - str was unicode
 
     def parse(dic):
         return (
