@@ -1,9 +1,12 @@
-import edf_reader as reader
+import header_reader as reader
 import datetime
 
 h1 = reader.load_edf_file('5.edf')
 h2 = reader.load_edf_file('test_generator_2.edf')
 
+
+# def test_number_of_elements():
+# assert number of labels == number of signals
 
 def test_data_format_version():
     assert h1['data_format_version'] == '0'
