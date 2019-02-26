@@ -115,3 +115,11 @@ def test_prefiltering():
 def test_number_of_samples_per_record():
     assert h1['number_of_samples_per_record'] == [6, 6, 6, 1, 1, 1, 1]
     assert h2['number_of_samples_per_record'] == [200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 51]
+
+
+def test_get_range():
+    list_a = [150, 200, 400, 700, 200]
+    list_b = [100, 100, 100, 200, 100]
+    result_list = [50, 100, 300, 500, 100]
+    assert reader.get_range(list_a, list_b) == result_list
+

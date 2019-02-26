@@ -8,12 +8,64 @@ filename = '5.edf'  # The 5.edf file is lacking some of the properties an edf fi
 ANNOTATIONS = 'EDF Annotations'
 
 
-class EdfReader:
+class EdfEndOfData(BaseException):
+    pass
+
+
+class HeaderReader:
     def __init__(self, file):
         self.file = file  # Change this to call the function instead ?
 
     def read_header(self):
         self.header = get_header_data(self.file)  # Move to init? google
+        self.dig_min, self.phys_min, self.phys_range, self.dig_range, self.gain = get_some_values(self.header)
+
+    def read_raw_record(self):
+        result = []
+        for num_samples in self.header['number_of_samples_per_record']:
+            samples = self.file.read(num_samples * 2)
+            if len(samples) != num_samples * 2:
+                raise EdfEndOfData  # Find potential solutions that don't require raising an exception.
+            result.append(samples)
+        return result
+
+    def convert_record(self, record):
+        h = self.header
+        dig_min, phys_min, gain = self.dig_min, self.phys_min, self.gain
+        time = float('nan')
+        signal = []
+        events = []
+        for i, samples in enumerate(record):
+            print('debug: h[label] == ' + str(h['label'][i]))
+            print(h['label'])
+            if h['label'][i] == ANNOTATIONS:
+                #need to write annnotation function
+                break
+
+
+
+
+def get_some_values(header):
+    dmin = header['digital_minimum']
+    pmin = header['physical_minimum']
+    pran = get_range(header['physical_maximum'], pmin)
+    dran = get_range(header['digital_maximum'], dmin)
+    gain = get_gain(pran, dran)
+    return dmin, pmin, pran, dran, gain
+
+
+def get_range(max_value, min_value):
+    ret = []
+    for ma, mi in zip(max_value, min_value):
+        ret.append(ma - mi)
+    return ret
+
+
+def get_gain(phys_range, dig_range):
+    ret = []
+    for phys, dig in zip(phys_range, dig_range):
+        ret.append(phys / dig)
+    return ret
 
 
 def load_edf_file(edffile):
@@ -22,8 +74,13 @@ def load_edf_file(edffile):
         with open(edffile, 'rb') as edf:
             return load_edf_file(edf)
 
-    reader = EdfReader(edffile)
+    reader = HeaderReader(edffile)
     reader.read_header()
+    rec = reader.read_raw_record()
+    print('rec    ->    ' + str(rec))
+    print('!!! RECSTART !!!')
+    print(rec)
+    print('!!! RECOVER !!!')
     # h = reader.header
     return reader.header
     # 'b' prefix in front of string means it's a bytes literal
@@ -66,7 +123,7 @@ def get_header_data(f):
     h['contiguous'] = contiguity(h['subtype'])
     h['number_of_records'] = int(f.read(8))
     h['record_duration'] = float(f.read(8))
-    ns = h['number_of_signals'] = int(f.read(4))  # ns variable for use when reading the data
+    ns = h['number_of_signals'] = int(f.read(4))  # ns - variable for use when reading the data
 
     channels = range(ns)
     h['label'] = [f.read(16).decode('ascii').strip() for n in channels]
