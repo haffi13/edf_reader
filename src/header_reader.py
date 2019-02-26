@@ -1,6 +1,7 @@
 import datetime
 import os
 import re
+import numpy as np
 
 basestring = r'C:\ProjectResources'
 filename = '5.edf'  # The 5.edf file is lacking some of the properties an edf file can have, should use some other file for testing
@@ -33,16 +34,48 @@ class HeaderReader:
         h = self.header
         dig_min, phys_min, gain = self.dig_min, self.phys_min, self.gain
         time = float('nan')
-        signal = []
+        signals = []
         events = []
-        for i, samples in enumerate(record):
-            print('debug: h[label] == ' + str(h['label'][i]))
-            print(h['label'])
+        for (i, samples) in enumerate(record):
+            #print('debug: h[label] == ' + str(h['label'][i]))
+            #print(h['label'])
             if h['label'][i] == ANNOTATIONS:
-                #need to write annnotation function
-                break
+                ann = get_tal(samples)
+                print('printinnaidndfnðadnf')
+                print(ann)
+                for i in ann:
+                    print(i)
+                print('problemspotstarthere')
+                time = ann[0][0]
+                print('---   annstart   ---')
+                print(time)
+                print('---   annend   ---')
+                events.extend(ann[1:])
+            else:
+                print(samples)
+                dig = np.frombuffer(samples, '<i2').astype(float)
+                phys = (dig - dig_min[i]) * gain[i] + phys_min[i]
+                signals.append(phys)
+        return time, signals, events
 
 
+# tal = Time-stamped Annotations Lists
+def get_tal(tal_str):
+    exp = '(?P<onset>[+\-]\d+(?:\.\d*)?)' + \
+          '(?:\x15(?P<duration>\d+(?:\.\d*)?))?' + \
+          '(\x14(?P<annotation>[^\x00]*))?' + \
+          '(?:\x14\x00)'
+
+    def annotation_to_list(annotation):
+        return str(annotation, 'utf-8').split('\x14') if annotation else []
+
+    def parse(dic):
+        return (
+            float(dic['onset']),
+            float(dic['duration']) if dic['duration'] else 0.,
+            annotation_to_list(dic['annotation']))
+
+    return [parse(m.groupdict()) for m in re.finditer(exp, str(tal_str))]
 
 
 def get_some_values(header):
@@ -55,10 +88,10 @@ def get_some_values(header):
 
 
 def get_range(max_value, min_value):
-    ret = []
+    range = []
     for ma, mi in zip(max_value, min_value):
-        ret.append(ma - mi)
-    return ret
+        range.append(ma - mi)
+    return range
 
 
 def get_gain(phys_range, dig_range):
@@ -77,10 +110,10 @@ def load_edf_file(edffile):
     reader = HeaderReader(edffile)
     reader.read_header()
     rec = reader.read_raw_record()
-    print('rec    ->    ' + str(rec))
-    print('!!! RECSTART !!!')
-    print(rec)
-    print('!!! RECOVER !!!')
+    tst = reader.convert_record(rec)
+    print('-----------------------------')
+    print(tst)
+    print('-----------------------------')
     # h = reader.header
     return reader.header
     # 'b' prefix in front of string means it's a bytes literal
