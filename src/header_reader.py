@@ -37,34 +37,23 @@ class HeaderReader:
         signals = []
         events = []
         for (i, samples) in enumerate(record):
-            #print('debug: h[label] == ' + str(h['label'][i]))
-            #print(h['label'])
             if h['label'][i] == ANNOTATIONS:
                 ann = get_tal(samples)
-                print('printinnaidndfnðadnf')
-                print(ann)
-                for i in ann:
-                    print(i)
-                print('problemspotstarthere')
-                time = ann[0][0]
-                print('---   annstart   ---')
-                print(time)
-                print('---   annend   ---')
+                time = ann[0]
                 events.extend(ann[1:])
             else:
-                print(samples)
-                dig = np.frombuffer(samples, '<i2').astype(float)
+                dig = np.frombuffer(samples, '<i2').astype(float)  #
                 phys = (dig - dig_min[i]) * gain[i] + phys_min[i]
                 signals.append(phys)
         return time, signals, events
 
 
 # tal = Time-stamped Annotations Lists
-def get_tal(tal_str):
-    exp = '(?P<onset>[+\-]\d+(?:\.\d*)?)' + \
-          '(?:\x15(?P<duration>\d+(?:\.\d*)?))?' + \
-          '(\x14(?P<annotation>[^\x00]*))?' + \
-          '(?:\x14\x00)'
+def get_tal(tal_bytes):
+    exp = b'(?P<onset>[+\-]\d+(?:\.\d*)?)' + \
+          b'(?:\x15(?P<duration>\d+(?:\.\d*)?))?' + \
+          b'(\x14(?P<annotation>[^\x00]*))?' + \
+          b'(?:\x14\x00)'
 
     def annotation_to_list(annotation):
         return str(annotation, 'utf-8').split('\x14') if annotation else []
@@ -75,7 +64,7 @@ def get_tal(tal_str):
             float(dic['duration']) if dic['duration'] else 0.,
             annotation_to_list(dic['annotation']))
 
-    return [parse(m.groupdict()) for m in re.finditer(exp, str(tal_str))]
+    return [parse(m.groupdict()) for m in re.finditer(exp, tal_bytes)]
 
 
 def get_some_values(header):
@@ -111,14 +100,10 @@ def load_edf_file(edffile):
     reader.read_header()
     rec = reader.read_raw_record()
     tst = reader.convert_record(rec)
-    print('-----------------------------')
-    print(tst)
-    print('-----------------------------')
-    # h = reader.header
     return reader.header
     # 'b' prefix in front of string means it's a bytes literal
     # Maybe it doesn't matter, otherwise just cast to string in get_header_data
-
+'''
     print('DataFormatVersion - ' + str(h['data_format_version']))
     print(h['data_format_version'])
     print('LocalPatientId - ' + str(h['local_patient_id']))
@@ -139,6 +124,7 @@ def load_edf_file(edffile):
     print(h['prefiltering'])
     print(h['number_of_samples_per_record'])
     print(h['reserved'])
+'''
 
 
 def get_header_data(f):
