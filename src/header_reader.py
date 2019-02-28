@@ -36,7 +36,7 @@ class HeaderReader:
         time = float('nan')
         signals = []
         events = []
-        for (i, samples) in enumerate(record):
+        for i, samples in enumerate(record):
             if h['label'][i] == ANNOTATIONS:
                 ann = get_tal(samples)
                 time = ann[0]
@@ -146,7 +146,6 @@ def get_header_data(f):
     # Here we should make sure that the file is the correct type before proceeding
     # fx. assert file.read(8) == '0       '   <-- find out if the value can be anything other than 0
     # 'edf+c' => uninterrupted(contiguous) recording && 'edf+d' => interrupted recording
-    # h['contiguous'] = h['subtype'] != 'EDF+D'
     h['data_format_version'] = f.read(8).decode('ascii').strip()
     h['local_patient_id'] = f.read(80).decode('ascii').strip()
     h['local_recording_id'] = f.read(80).decode('ascii').strip()
@@ -158,7 +157,7 @@ def get_header_data(f):
     h['record_duration'] = float(f.read(8))
     ns = h['number_of_signals'] = int(f.read(4))  # ns - variable for use when reading the data
 
-    channels = range(ns)
+    channels = range(ns)  # Creates a list of numbers used for iteration in the for-loops below
     h['label'] = [f.read(16).decode('ascii').strip() for n in channels]
     h['transducer_type'] = [f.read(80).decode('ascii').strip() for n in channels]
     h['physical_dimension'] = [f.read(8).decode('ascii').strip() for n in channels]
@@ -179,6 +178,6 @@ def contiguity(subtype):
 
 
 def get_start_time(date, time):
-    (day, month, year) = [int(x) for x in re.findall('([0-9][0-9])', date)]
-    (hour, minute, sec) = [int(x) for x in re.findall('([0-9][0-9])', time)]
+    day, month, year = [int(x) for x in re.findall('([0-9][0-9])', date)]
+    hour, minute, sec = [int(x) for x in re.findall('([0-9][0-9])', time)]
     return str(datetime.datetime(2000 + year, month, day, hour, minute, sec))
