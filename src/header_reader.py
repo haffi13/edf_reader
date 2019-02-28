@@ -19,7 +19,7 @@ class HeaderReader:
 
     def read_header(self):
         self.header = get_header_data(self.file)  # Move to init? google
-        self.dig_min, self.phys_min, self.phys_range, self.dig_range, self.gain = get_some_values(self.header)
+        self.dig_min, self.phys_min, self.phys_range, self.dig_range, self.gain = get_other_header_values(self.header)
 
     def read_raw_record(self):
         result = []
@@ -50,10 +50,10 @@ class HeaderReader:
 
 # tal = Time-stamped Annotations Lists
 def get_tal(tal_bytes):
-    exp = b'(?P<onset>[+\-]\d+(?:\.\d*)?)' + \
-          b'(?:\x15(?P<duration>\d+(?:\.\d*)?))?' + \
-          b'(\x14(?P<annotation>[^\x00]*))?' + \
-          b'(?:\x14\x00)'
+    exp = br'(?P<onset>[+\-][0-9]+(?:\.[0-9]*)?)' + \
+          br'(?:\x15(?P<duration>[0-9]+(?:\.[0-9]*)?))?' + \
+          br'(\x14(?P<annotation>[^\x00]*))?' + \
+          br'(?:\x14\x00)'
 
     def annotation_to_list(annotation):
         return str(annotation, 'utf-8').split('\x14') if annotation else []
@@ -67,7 +67,7 @@ def get_tal(tal_bytes):
     return [parse(m.groupdict()) for m in re.finditer(exp, tal_bytes)]
 
 
-def get_some_values(header):
+def get_other_header_values(header):
     dmin = header['digital_minimum']
     pmin = header['physical_minimum']
     pran = get_range(header['physical_maximum'], pmin)
@@ -99,10 +99,24 @@ def load_edf_file(edffile):
     reader = HeaderReader(edffile)
     reader.read_header()
     rec = reader.read_raw_record()
-    tst = reader.convert_record(rec)
+    time, signals, events = reader.convert_record(rec)
+
+    print('time ------')
+    print(type(time))
+    print(time)
+    print('timedone-------')
+    print('signals-------')
+    #print(signals)
+    print('signalDone------------')
+    print('events---------')
+    print(events)
+    print('eventsdone---------')
+
     return reader.header
     # 'b' prefix in front of string means it's a bytes literal
     # Maybe it doesn't matter, otherwise just cast to string in get_header_data
+
+
 '''
     print('DataFormatVersion - ' + str(h['data_format_version']))
     print(h['data_format_version'])
