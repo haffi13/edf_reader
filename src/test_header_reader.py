@@ -123,3 +123,4 @@ def test_get_range():
     result_list = [50, 100, 300, 500, 100]
     assert reader.get_range(list_a, list_b) == result_list
 
+# --------------------

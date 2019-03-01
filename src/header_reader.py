@@ -92,10 +92,9 @@ def get_gain(phys_range, dig_range):
 
 def load_edf_file(edffile):
     if isinstance(edffile, str):
-        os.chdir(basestring)
+        os.chdir(basestring)    # <---------- Use os.path instead of hardcoding.
         with open(edffile, 'rb') as edf:
             return load_edf_file(edf)
-
     reader = HeaderReader(edffile)
     reader.read_header()
     rec = reader.read_raw_record()
@@ -106,9 +105,11 @@ def load_edf_file(edffile):
     print(time)
     print('timedone-------')
     print('signals-------')
-    #print(signals)
+    print(type(signals))
+    print(signals)
     print('signalDone------------')
     print('events---------')
+    print(type(events))
     print(events)
     print('eventsdone---------')
 
