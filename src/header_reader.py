@@ -145,7 +145,7 @@ def load_edf_file(edffile):
 def get_header_data(f):
     h = {}
     # Here we should make sure that the file is the correct type before proceeding
-    # fx. assert file.read(8) == '0       '   <-- find out if the value can be anything other than 0
+    # fx. assert file.read(8) == '0       '
     # 'edf+c' => uninterrupted(contiguous) recording && 'edf+d' => interrupted recording
     h['data_format_version'] = f.read(8).decode('ascii').strip()
     h['local_patient_id'] = f.read(80).decode('ascii').strip()
