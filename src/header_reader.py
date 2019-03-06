@@ -47,6 +47,19 @@ class HeaderReader:
                 signals.append(phys)
         return time, signals, events
 
+    def read_record(self):
+        return self.convert_record(self.read_raw_record())
+
+    def records(self):
+        '''
+        Record generator.
+        '''
+        try:
+            while True:
+                yield self.read_record()
+        except EdfEndOfData:
+            pass
+
 
 # tal = Time-stamped Annotations Lists
 def get_tal(tal_bytes):
@@ -92,54 +105,16 @@ def get_gain(phys_range, dig_range):
 
 def load_edf_file(edffile):
     if isinstance(edffile, str):
-        os.chdir(basestring)    # <---------- Use os.path instead of hardcoding.
+        os.chdir(basestring)  # <---------- Use os.path instead of hardcoding.
         with open(edffile, 'rb') as edf:
             return load_edf_file(edf)
     reader = HeaderReader(edffile)
     reader.read_header()
-    rec = reader.read_raw_record()
-    time, signals, events = reader.convert_record(rec)
+    rectime, data_points, annotations = list(zip(*reader.records()))
 
-    print('time ------')
-    print(type(time))
-    print(time)
-    print('timedone-------')
-    print('signals-------')
-    print(type(signals))
-    print(signals)
-    print('signalDone------------')
-    print('events---------')
-    print(type(events))
-    print(events)
-    print('eventsdone---------')
-
-    return reader.header
+    return reader.header  # The return values of this method cannot be changed without breaking tests.
     # 'b' prefix in front of string means it's a bytes literal
     # Maybe it doesn't matter, otherwise just cast to string in get_header_data
-
-
-'''
-    print('DataFormatVersion - ' + str(h['data_format_version']))
-    print(h['data_format_version'])
-    print('LocalPatientId - ' + str(h['local_patient_id']))
-    print(h['start_time'])
-    print('bytes in header - ' + str(h['bytes_in_header']))
-    print('subtype - ' + str(h['subtype']))
-    print('contiguous - ' + str(h['contiguous']))
-    print('num of records - ' + str(h['number_of_records']))
-    print('record duration - ' + str(h['record_duration']))
-    print('num of signals - ' + str(h['number_of_signals']))
-    print('label ' + str(h['label']))
-    print(h['transducer_type'])
-    print(h['physical_dimension'])
-    print(h['physical_minimum'])
-    print(h['physical_maximum'])
-    print(h['digital_minimum'])
-    print(h['digital_maximum'])
-    print(h['prefiltering'])
-    print(h['number_of_samples_per_record'])
-    print(h['reserved'])
-'''
 
 
 def get_header_data(f):
