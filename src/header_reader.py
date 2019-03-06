@@ -116,35 +116,29 @@ def load_edf_file(edffile):
     reader.read_header()
     rectime, data_points, annotations = list(zip(*reader.records()))
 
+    temp_index = 5
+    # These must also be indexed to get values for the correct signal.
+    num_records = reader.header['number_of_records']
+    num_samples = reader.header['number_of_samples_per_record'][temp_index]
+    sample_interval = num_records / (num_records * num_samples)
+
     i = 0
     length = len(data_points)
+    print(length)
     sinewave = np.empty([0, 0])
-    print('------------------------------------------------------------------------------------------')
+    # ('--------------this loop can be nested to get all signals------------------')
     while i < length:
-        t = data_points[i][5]
+        t = data_points[i][temp_index]
         i += 1
         sinewave = np.append(sinewave, t)
-    print(len(sinewave))
-    print(type(sinewave))
+
     sinemax = math.ceil(np.amax(sinewave))
     sinemin = math.floor(np.amin(sinewave))
     print('sinemax - ' + str(sinemax))
     print('sinemin - ' + str(sinemin))
-    smin = sys.float_info.max
-    smax = sys.float_info.min
-    print(smin)
-    print(smax)
-    s = ''
-    for x in sinewave:
-        s += str(type(x))
-        s += ' - '
-    with open('type_result.txt', 'w') as wf:
-        wf.write(s)
-        print('file created!')
-    print('min = ' + str(smin) + '   max = ' + str(smax))
 
     fig, ax = plt.subplots()
-    t = np.arange(0.0, 600.00, 0.005)  # (0, number of records, (number_of_records / number_of_records * sampling rate))
+    t = np.arange(0.0, num_records, sample_interval)  # (0, number of records, (number_of_records / number_of_records * sampling rate))
     print(len(t))
     plt.plot(t, sinewave)
     plt.axis([0, 10, sinemin, sinemax])  # first 2 numbers are range that is visible at a time, last 2 are min/max for y axis
