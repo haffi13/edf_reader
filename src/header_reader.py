@@ -5,6 +5,7 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider
+import time
 
 basestring = r'C:\ProjectResources'
 filename = '5.edf'  # The 5.edf file is lacking some of the properties an edf file can have, should use some other file for testing
@@ -111,6 +112,7 @@ def load_edf_file(edffile):
         os.chdir(basestring)  # <---------- Use os.path instead of hardcoding.
         with open(edffile, 'rb') as edf:
             return load_edf_file(edf)
+    start_time = time.process_time()  # To measure the time it takes the process to finish
     reader = HeaderReader(edffile)
     reader.read_header()
     rectime, data_points, annotations = list(zip(*reader.records()))
@@ -125,23 +127,23 @@ def load_edf_file(edffile):
 
     # Nested loop starts here!
     while y < num_signals:
-        temp = np.empty([0, 0])
+        temp = np.empty([0, 0])  # Creates an empty np.ndarray
         while x < num_records:
-            temp = np.append(temp, data_points[x][y])
+            temp = np.append(temp, data_points[x][y])  # Appends values from the signal to the ndarray
             x += 1
-        signals.insert(y, temp)
-        num_samples = len(data_points[0][
-                              y])  # We get the number of samples here, in case there are different sample rates between signals.
+        signals.insert(y, temp)  # Inserts the whole signal to the list at the same index the signal was at in data_points
+        num_samples = len(data_points[0][y])  # We get the number of samples here, in case there are different sample rates between signals.
         info = {'num_records': num_records,
                 'sample_interval': num_records / (num_records * num_samples),
                 'max_y': math.ceil(np.amax(temp)),
-                'min_y': math.floor(np.amin(temp))}
-        signal_info.insert(y, info)
+                'min_y': math.floor(np.amin(temp))}  # These values are added to a dictionary so all needed values can be returned to another function.
+        signal_info.insert(y, info)  # Inserts the signal information to the list at the same index the signal was at in data_points
         x = 0
         y += 1
-
     # Nested loop ends here! -- Return signals and signal_info here and do the rest elsewhere!!
-
+    total_time = time.process_time() - start_time
+    print('time_elapsed_reading_header_and_processing_signals: ' + str(total_time))
+    start_time = time.process_time()  # To measure the time it takes the process to finish
     figs, axs = plt.subplots(num_signals, 1, sharex='col')  # (rows, columns)
     i = 0
     for s in signals:
@@ -150,7 +152,8 @@ def load_edf_file(edffile):
         axs[i].set_xlim(0, signal_info[i]['num_records'])
         axs[i].set_ylim(signal_info[i]['min_y'], signal_info[i]['max_y'])
         i += 1
-
+    total_time = time.process_time() - start_time
+    print('time_elapsed_plotting_signals: ' + str(total_time))
     plt.show()
 
     return reader.header  # The return values of this method cannot be changed without breaking tests.
