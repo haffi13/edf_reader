@@ -1,11 +1,10 @@
 import datetime
 import os
 import re
+import math
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider
-import sys
-import math
 
 basestring = r'C:\ProjectResources'
 filename = '5.edf'  # The 5.edf file is lacking some of the properties an edf file can have, should use some other file for testing
@@ -116,11 +115,34 @@ def load_edf_file(edffile):
     reader.read_header()
     rectime, data_points, annotations = list(zip(*reader.records()))
 
-    temp_index = 5
-    # These must also be indexed to get values for the correct signal.
-    num_records = reader.header['number_of_records']
-    num_samples = reader.header['number_of_samples_per_record'][temp_index]
-    sample_interval = num_records / (num_records * num_samples)
+    # Nested loop setup start here!
+    x = 0
+    y = 0
+    num_signals = len(data_points[0])
+    num_records = len(data_points)
+    signals = []
+    signal_info = []
+
+    # Nested loop starts here!
+    while y < num_signals:
+        temp = np.empty([0, 0])
+        while x < num_records:
+            temp = np.append(temp, data_points[x][y])
+            x += 1
+        signals.insert(y, temp)
+        num_samples = len(data_points[0][y])
+        sample_interval = num_records / (num_records * num_samples)
+        info = {num_samples, sample_interval}
+        signal_info.insert(y, info)
+        x = 0
+        y += 1
+
+    # Nested loop ends here!
+    temp_index = 4
+    # Num_Samples must be indexed to get values for the correct signal.
+
+    print('nsig - ' + str(num_signals) + ' -  nrec - ' + str(num_records) + ' - nsam - ' + str(
+        num_samples) + ' - interv ' + str(sample_interval))
 
     i = 0
     length = len(data_points)
@@ -138,10 +160,12 @@ def load_edf_file(edffile):
     print('sinemin - ' + str(sinemin))
 
     fig, ax = plt.subplots()
-    t = np.arange(0.0, num_records, sample_interval)  # (0, number of records, (number_of_records / number_of_records * sampling rate))
+    t = np.arange(0.0, num_records,
+                  sample_interval)  # (0, number of records, (number_of_records / number_of_records * sampling rate))
     print(len(t))
     plt.plot(t, sinewave)
-    plt.axis([0, 10, sinemin, sinemax])  # first 2 numbers are range that is visible at a time, last 2 are min/max for y axis
+    plt.axis(
+        [0, 10, sinemin, sinemax])  # first 2 numbers are range that is visible at a time, last 2 are min/max for y axis
     axpos = plt.axes([0.2, 0.1, 0.65, 0.03])  # position of the slider bar
     spos = Slider(axpos, 'Pos', 0.1, 590)  # position, label, step size, length(max - visible range at a time)
 
