@@ -130,52 +130,27 @@ def load_edf_file(edffile):
             temp = np.append(temp, data_points[x][y])
             x += 1
         signals.insert(y, temp)
-        num_samples = len(data_points[0][y])
-        sample_interval = num_records / (num_records * num_samples)
-        info = {num_samples, sample_interval}
+        num_samples = len(data_points[0][
+                              y])  # We get the number of samples here, in case there are different sample rates between signals.
+        info = {'num_records': num_records,
+                'sample_interval': num_records / (num_records * num_samples),
+                'max_y': math.ceil(np.amax(temp)),
+                'min_y': math.floor(np.amin(temp))}
         signal_info.insert(y, info)
         x = 0
         y += 1
 
-    # Nested loop ends here!
-    temp_index = 4
-    # Num_Samples must be indexed to get values for the correct signal.
+    # Nested loop ends here! -- Return signals and signal_info here and do the rest elsewhere!!
 
-    print('nsig - ' + str(num_signals) + ' -  nrec - ' + str(num_records) + ' - nsam - ' + str(
-        num_samples) + ' - interv ' + str(sample_interval))
-
+    figs, axs = plt.subplots(num_signals, 1, sharex='col')  # (rows, columns)
     i = 0
-    length = len(data_points)
-    print(length)
-    sinewave = np.empty([0, 0])
-    # ('--------------this loop can be nested to get all signals------------------')
-    while i < length:
-        t = data_points[i][temp_index]
+    for s in signals:
+        t = np.arange(0.0, signal_info[i]['num_records'], signal_info[i]['sample_interval'])
+        axs[i].plot(t, s)
+        axs[i].set_xlim(0, signal_info[i]['num_records'])
+        axs[i].set_ylim(signal_info[i]['min_y'], signal_info[i]['max_y'])
         i += 1
-        sinewave = np.append(sinewave, t)
 
-    sinemax = math.ceil(np.amax(sinewave))
-    sinemin = math.floor(np.amin(sinewave))
-    print('sinemax - ' + str(sinemax))
-    print('sinemin - ' + str(sinemin))
-
-    fig, ax = plt.subplots()
-    t = np.arange(0.0, num_records,
-                  sample_interval)  # (0, number of records, (number_of_records / number_of_records * sampling rate))
-    print(len(t))
-    plt.plot(t, sinewave)
-    plt.axis(
-        [0, 10, sinemin, sinemax])  # first 2 numbers are range that is visible at a time, last 2 are min/max for y axis
-    axpos = plt.axes([0.2, 0.1, 0.65, 0.03])  # position of the slider bar
-    spos = Slider(axpos, 'Pos', 0.1, 590)  # position, label, step size, length(max - visible range at a time)
-
-    def update(val):
-        pos = spos.val
-        ax.axis([pos, pos + 10, sinemin, sinemax])  # bottom_left_pos, pos+visible range at a time, min/max for y axis
-        fig.canvas.draw_idle()
-
-    spos.on_changed(update)
-    ax.grid(True)
     plt.show()
 
     return reader.header  # The return values of this method cannot be changed without breaking tests.
@@ -223,3 +198,27 @@ def get_start_time(date, time):
     day, month, year = [int(x) for x in re.findall('([0-9][0-9])', date)]
     hour, minute, sec = [int(x) for x in re.findall('([0-9][0-9])', time)]
     return str(datetime.datetime(2000 + year, month, day, hour, minute, sec))
+
+
+'''
+Slider, need to make it work with the new plotting algorithm
+
+    fig, ax = plt.subplots()
+    t = np.arange(0.0, num_records,
+                  sample_interval)  # (0, number of records, (number_of_records / number_of_records * sampling rate))
+    print(len(t))
+    plt.plot(t, sinewave)
+    plt.axis(
+        [0, 10, sinemin, sinemax])  # first 2 numbers are range that is visible at a time, last 2 are min/max for y axis
+    axpos = plt.axes([0.2, 0.1, 0.65, 0.03])  # position of the slider bar
+    spos = Slider(axpos, 'Pos', 0.1, 590)  # position, label, step size, length(max - visible range at a time)
+
+    def update(val):
+        pos = spos.val
+        ax.axis([pos, pos + 10, sinemin, sinemax])  # bottom_left_pos, pos+visible range at a time, min/max for y axis
+        fig.canvas.draw_idle()
+
+    spos.on_changed(update)
+    ax.grid(True)
+    plt.show()
+'''
