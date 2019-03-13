@@ -148,11 +148,12 @@ def load_edf_file(edffile):
 
     pt.stop('time_elapsed_plotting_signals')
 
-    plt.show()
+    #plt.show()
     # plt.savefig("test.svg")
     # print('test.svg created!')
 
-    return reader.header  # The return values of this method cannot be changed without breaking tests.
+    return dp
+    #return reader.header  # The return values of this method cannot be changed without breaking tests.
     # 'b' prefix in front of string means it's a bytes literal
     # Maybe it doesn't matter, otherwise just cast to string in get_header_data
 
