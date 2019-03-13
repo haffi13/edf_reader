@@ -159,7 +159,11 @@ def load_edf_file(edffile):
     print('sinemax - ' + str(sinemax))
     print('sinemin - ' + str(sinemin))
 
+    mysignals = signal_info
+
     fig, ax = plt.subplots()
+    for signal in mysignals:
+        ax.plot(signal[x], signal[y])
     t = np.arange(0.0, num_records,
                   sample_interval)  # (0, number of records, (number_of_records / number_of_records * sampling rate))
     print(len(t))
