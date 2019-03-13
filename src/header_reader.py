@@ -5,11 +5,17 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider
+import time
+from functools import reduce
+import operator
+import process_timer  # Need to update the process_timer module in the main project.
 
 basestring = r'C:\ProjectResources'
 filename = '5.edf'  # The 5.edf file is lacking some of the properties an edf file can have, should use some other file for testing
 
 ANNOTATIONS = 'EDF Annotations'
+
+pt = process_timer.Timer()
 
 
 class EdfEndOfData(BaseException):
@@ -113,74 +119,38 @@ def load_edf_file(edffile):
             return load_edf_file(edf)
     reader = HeaderReader(edffile)
     reader.read_header()
+    h = reader.header
     rectime, data_points, annotations = list(zip(*reader.records()))
 
-    # Nested loop setup start here!
-    x = 0
-    y = 0
-    num_signals = len(data_points[0])
-    num_records = len(data_points)
-    signals = []
-    signal_info = []
+    start_time = time.process_time()  # To measure the time it takes the process to finish
+    pt.start()
+    dp = np.hstack(data_points)
+    pt.stop('time_elapsed_numpy_hstack')
 
-    # Nested loop starts here!
-    while y < num_signals:
-        temp = np.empty([0, 0])
-        while x < num_records:
-            temp = np.append(temp, data_points[x][y])
-            x += 1
-        signals.insert(y, temp)
-        num_samples = len(data_points[0][y])
-        sample_interval = num_records / (num_records * num_samples)
-        info = {num_samples, sample_interval}
-        signal_info.insert(y, info)
-        x = 0
-        y += 1
+    nsamp = np.unique([n for (l, n) in zip(h['label'], h['number_of_samples_per_record']) if l != ANNOTATIONS])
+    samplerate = float(nsamp[0]) / h['record_duration']
 
-    # Nested loop ends here!
-    temp_index = 4
-    # Num_Samples must be indexed to get values for the correct signal.
+    # timi = np.arange(dp.shape[1], samplerate)  # <------------------- This doesn't work because of different sample rates, uses the last sample rate(4) instead of the correct one for each(128). This should be fixable.
+    pt.start()
+    annotations = reduce(operator.add, annotations)  # This works. tuple -> list
+    pt.stop('time_elapsed_annotations')
 
-    print('nsig - ' + str(num_signals) + ' -  nrec - ' + str(num_records) + ' - nsam - ' + str(
-        num_samples) + ' - interv ' + str(sample_interval))
+    pt.start()  # To measure the time it takes the process to finish
+    figs, axs = plt.subplots(len(dp), 1, sharex='col')  # (rows, columns)
+    for i, s in enumerate(dp):
+        # The samplerate is fixed!
+        t = np.arange(0.0, len(s) / samplerate, (len(s) / samplerate) / len(s))
+        axs[i].plot(t, s)
+        # If there is only one samplerate this works, later the samplerate should be stored
+        # so the rate for each individual signal can be found and plotted accordingly.
+        axs[i].set_xlim(0, len(s) / samplerate)
+        axs[i].set_ylim(math.floor(np.amin(s)), math.ceil(np.amax(s)))
 
-    i = 0
-    length = len(data_points)
-    print(length)
-    sinewave = np.empty([0, 0])
-    # ('--------------this loop can be nested to get all signals------------------')
-    while i < length:
-        t = data_points[i][temp_index]
-        i += 1
-        sinewave = np.append(sinewave, t)
+    pt.stop('time_elapsed_plotting_signals')
 
-    sinemax = math.ceil(np.amax(sinewave))
-    sinemin = math.floor(np.amin(sinewave))
-    print('sinemax - ' + str(sinemax))
-    print('sinemin - ' + str(sinemin))
-
-    mysignals = signal_info
-
-    fig, ax = plt.subplots()
-    for signal in mysignals:
-        ax.plot(signal[x], signal[y])
-    t = np.arange(0.0, num_records,
-                  sample_interval)  # (0, number of records, (number_of_records / number_of_records * sampling rate))
-    print(len(t))
-    plt.plot(t, sinewave)
-    plt.axis(
-        [0, 10, sinemin, sinemax])  # first 2 numbers are range that is visible at a time, last 2 are min/max for y axis
-    axpos = plt.axes([0.2, 0.1, 0.65, 0.03])  # position of the slider bar
-    spos = Slider(axpos, 'Pos', 0.1, 590)  # position, label, step size, length(max - visible range at a time)
-
-    def update(val):
-        pos = spos.val
-        ax.axis([pos, pos + 10, sinemin, sinemax])  # bottom_left_pos, pos+visible range at a time, min/max for y axis
-        fig.canvas.draw_idle()
-
-    spos.on_changed(update)
-    ax.grid(True)
     plt.show()
+    # plt.savefig("test.svg")
+    # print('test.svg created!')
 
     return reader.header  # The return values of this method cannot be changed without breaking tests.
     # 'b' prefix in front of string means it's a bytes literal
