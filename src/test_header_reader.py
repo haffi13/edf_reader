@@ -1,8 +1,12 @@
 import header_reader as reader
 import datetime
 
+#  All tests are broken because of change in
+
 h1 = reader.load_edf_file('5.edf')
+h1 = h1.header
 h2 = reader.load_edf_file('test_generator_2.edf')
+h2 = h2.header
 
 
 # def test_number_of_elements():

@@ -1,7 +1,8 @@
+#!/usr/bin/env python3
+
 import datetime
 import os
 import re
-import math
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider
@@ -134,7 +135,7 @@ def load_edf_file(edffile):
     pt.start()
     annotations = reduce(operator.add, annotations)  # This works. tuple -> list
     pt.stop('time_elapsed_annotations')
-
+    '''
     pt.start()  # To measure the time it takes the process to finish
     figs, axs = plt.subplots(len(dp), 1, sharex='col')  # (rows, columns)
     for i, s in enumerate(dp):
@@ -147,12 +148,12 @@ def load_edf_file(edffile):
         axs[i].set_ylim(math.floor(np.amin(s)), math.ceil(np.amax(s)))
 
     pt.stop('time_elapsed_plotting_signals')
-
+    '''
     #plt.show()
     # plt.savefig("test.svg")
     # print('test.svg created!')
 
-    return dp
+    return dp, samplerate
     #return reader.header  # The return values of this method cannot be changed without breaking tests.
     # 'b' prefix in front of string means it's a bytes literal
     # Maybe it doesn't matter, otherwise just cast to string in get_header_data
@@ -194,7 +195,8 @@ def contiguity(subtype):
     return True
 
 
-def get_start_time(date, time):
+# hms == hour,minute,second. There is another attribute in the file called time so there's a need for another name.
+def get_start_time(date, hms):
     day, month, year = [int(x) for x in re.findall('([0-9][0-9])', date)]
-    hour, minute, sec = [int(x) for x in re.findall('([0-9][0-9])', time)]
+    hour, minute, sec = [int(x) for x in re.findall('([0-9][0-9])', hms)]
     return str(datetime.datetime(2000 + year, month, day, hour, minute, sec))
