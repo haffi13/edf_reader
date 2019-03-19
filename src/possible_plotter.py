@@ -15,6 +15,7 @@ print(xxx)
 
 fig = plt.figure("MRI_with_EEG")  # andet navn
 
+plt.minorticks_off()
 # Load the EEG data
 # n_samples, n_rows = 800, 4  # her skal den hente data fra filen og selv finde antal af "Samples" og "rows"
 # with cbook.get_sample_data('eeg.dat') as eegfile:  # her skal den bruge vores fil
@@ -64,7 +65,7 @@ ax2.set_xticks(lll)
 print('set_xticks done')
 dmin = math.floor(xxx.min())
 dmax = math.ceil(xxx.max())
-dr = (dmax - dmin) * 0.7  # Crowd them a bit.   <------------member!!
+dr = (dmax - dmin) * 1.5  # Crowd them a bit.   <------------member!!
 y0 = dmin
 y1 = (len(xxx) - 1) * dr + dmax
 ax2.set_ylim(y0, y1)
@@ -93,10 +94,19 @@ ax2.add_collection(lines)
 # ax2.set_yticklabels(['PG3', 'PG5', 'PG7', 'PG9'])  # her skal den hente labels fra EDF fil
 
 plt.axis([0, 10, y0, y1])  # first 2 numbers are range that is visible at a time, last 2 are min/max for y axis
-axpos = plt.axes([0.2, 0.1, 0.65, 0.03])  # position of the slider bar
-spos = Slider(axpos, 'Pos', 0.1, 590)  # position, label, step size, length(max - visible range at a time)
+axpos = plt.axes([0.2, 0.01, 0.65, 0.03])  # position of the slider bar
+spos = Slider(axpos, 'Pos', 0.5, 590)  # position, label, step size, length(max - visible range at a time)
+plt.minorticks_off()
+def update(val):
+    pos = spos.val
+    ax2.axis([pos,pos + 10, y0, y1])
+    fig.canvas.draw_idle()
+
+plt.minorticks_off()
 
 ax2.set_xlabel('Time (s)')
 
 # plt.tight_layout()
+plt.subplots_adjust(left=0.04, right=0.99, top=0.99, bottom=0.12, hspace=0.0)
+spos.on_changed(update)
 plt.show()
